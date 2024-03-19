@@ -24,9 +24,13 @@ int main() {
     // Bonus: convert an array into a heap in linear time
     int nums[] = {3, 1, 4, 1, 5, 9, 2, 6};
     int numsSize = sizeof(nums) / sizeof(nums[0]);
-    Heap *heapFromArr = createHeap(10);
+    Heap *heapFromArr = createHeap(8);
     buildHeap(heapFromArr, nums, numsSize);
     printf("Heap built from array, max element: %d\n", top(heapFromArr));
+
+    ensureCapacity(heapFromArr);
+    printf("The new heap capacity is : %d\n", heapFromArr->capacity);
+    printf("The new heap size is %d\n", size(heapFromArr));
 
     // Clean up
     free(heap->data);

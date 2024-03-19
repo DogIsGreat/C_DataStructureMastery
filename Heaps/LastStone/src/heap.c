@@ -14,9 +14,10 @@ Heap* createHeap(int capacity) {
 }
 
 void ensureCapacity(Heap *heap, int newcapacity) {
-    if (heap->size == heap->capacity) {
-        heap->capacity *= 2;
-        heap->data = (int*)realloc(heap->data, heap->capacity * sizeof(int));
+    if (heap->size <= newcapacity) {
+        heap->data = (int*)realloc(heap->data, (newcapacity * sizeof(int)));
+    } else {
+        printf(" Failed to enter a heap capacity that is valid. \n");
     }
 }
 
@@ -51,7 +52,7 @@ void heapifyDown(Heap *heap, int index) {
 }
 
 void add(Heap *heap, int element) {
-    ensureCapacity(heap);
+    //ensureCapacity(heap,);
     heap->data[heap->size] = element;
     heap->size++;
     heapifyUp(heap, heap->size - 1);
