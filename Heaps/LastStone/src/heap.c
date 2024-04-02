@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-
 Heap* createHeap(int capacity) {
     Heap *heap = (Heap*)malloc(sizeof(Heap));
     heap->data = (int*)malloc(capacity * sizeof(int));

@@ -3,31 +3,25 @@
 
 //typedef struct Heap;
 
-typedef struct Heap {
-    double *data;
-    int size;
-    int capacity;
-} Heap;
+typedef struct{
+    double* maxHeap; // First half of the elements
+    int maxHeapSize;
+    double* minHeap;
+    int minHeapSize;
+} MedianFinder;
 
-Heap* createHeap(int capacity);
-
-void ensureCapacity(Heap *heap, int newcapacity);
+MedianFinder* medianFinderCreate();
 
 void swap(double *a, double *b);
 
-void heapifyUp(Heap *heap, int index);
+void maxHeapify(MedianFinder* obj, int index);
 
-void heapifyDown(Heap *heap, int index);
+void minHeapify(MedianFinder* obj, int index);
 
-void add(Heap *heap, int element);
+void addNum(MedianFinder* obj, int num);
 
-int top(Heap *heap);
+double findMedian(MedianFinder* obj);
 
-void pop(Heap *heap);
-
-int size(Heap *heap);
-
-void buildHeap(Heap *heap, int *array, int arraySize);
-
+void medianFinderFree(MedianFinder* obj);
 
 #endif

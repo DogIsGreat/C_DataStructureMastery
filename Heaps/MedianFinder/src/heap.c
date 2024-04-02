@@ -3,22 +3,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define MAX_SIZE 10000
 
 
-Heap* createHeap(int capacity) {
-    Heap *heap = (Heap*)malloc(sizeof(Heap));
-    heap->data = (double*)malloc(capacity * sizeof(double));
-    heap->size = 0;
-    heap->capacity = capacity;
-    return heap;
-}
 
-void ensureCapacity(Heap *heap, int newcapacity) {
-    if (heap->size <= newcapacity) {
-        heap->data = (double*)realloc(heap->data, (newcapacity * sizeof(double)));
-    } else {
-        printf(" Failed to enter a heap capacity that is valid. \n");
-    }
+MedianFinder* medianFinderCreate() {
+    MedianFinder* obj = (MedianFinder*)malloc(sizeof(MedianFinder));
+    obj->maxHeap = (double*)malloc(sizeof(double) * MAX_SIZE);
+    obj->minHeap = (double*)malloc(sizeof(double) * MAX_SIZE);
+    obj->maxHeapSize = 0;
+    obj->minHeapSize = 0;
+    return obj;
 }
 
 void swap(double *a, double *b) {
@@ -27,64 +22,81 @@ void swap(double *a, double *b) {
     *b = temp;
 }
 
-void heapifyUp(Heap *heap, int index) {
-    while (index != 0 && heap->data[(index - 1) / 2] < heap->data[index]) {
-        swap(&heap->data[(index - 1) / 2], &heap->data[index]);
-        index = (index - 1) / 2;
+void maxHeapify(MedianFinder* obj, int index) {
+    int largest = index;
+    int left = 2 * index + 1;
+    int right = 2 * index + 2;
+
+    if (left < obj->maxHeapSize && obj->maxHeap[left] > obj->maxHeap[largest]){
+        largest = left;
+    }
+    if (right < obj->maxHeapSize && obj->maxHeap[right] > obj->maxHeap[largest]){
+        largest = right;
+    }
+    if (largest != index){
+        swap(&obj->maxHeap[index], &obj->maxHeap[largest]);
+        maxHeapify(obj, largest);
     }
 }
 
-void heapifyDown(Heap *heap, int index) {
-    int largest = index;
+void minHeapify(MedianFinder* obj, int index) {
+    int smallest = index;
     int leftChildIndex = 2 * index + 1;
     int rightChildIndex = 2 * index + 2;
 
-    if (leftChildIndex < heap->size && heap->data[leftChildIndex] > heap->data[largest])
-        largest = leftChildIndex;
+    if (leftChildIndex < obj->minHeapSize && obj->minHeap[leftChildIndex] < obj->minHeap[smallest]){
+        smallest = leftChildIndex;
+    }
+    if (rightChildIndex < obj->minHeapSize && obj->minHeap[rightChildIndex] < obj->minHeap[smallest])
+        smallest = rightChildIndex;
 
-    if (rightChildIndex < heap->size && heap->data[rightChildIndex] > heap->data[largest])
-        largest = rightChildIndex;
-
-    if (largest != index) {
-        swap(&heap->data[index], &heap->data[largest]);
-        heapifyDown(heap, largest);
+    if (smallest != index) {
+        swap(&obj->minHeap[index], &obj->minHeap[smallest]);
+        minHeapify(obj, smallest);
     }
 }
 
-void add(Heap *heap, int element) {
-    //ensureCapacity(heap,);
-    heap->data[heap->size] = element;
-    heap->size++;
-    heapifyUp(heap, heap->size - 1);
-}
-
-int top(Heap *heap) {
-    return heap->data[0];
-}
-
-void pop(Heap *heap) {
-    if (heap->size == 0) return;
-    heap->data[0] = heap->data[heap->size - 1];
-    heap->size--;
-    heapifyDown(heap, 0);
-}
-
-int size(Heap *heap) {
-    return heap->size;
-}
-
-void buildHeap(Heap *heap, int *array, int arraySize) {
-    if (arraySize > heap->capacity) {
-        heap->capacity = arraySize;
-        heap->data = (double*)realloc(heap->data, heap->capacity * sizeof(double));
+void addNum(MedianFinder* obj, int num) {
+    if (obj->maxHeapSize == 0 || num < obj->maxHeap[0]){
+        obj->maxHeap[obj->maxHeapSize++] = num;
+        for (int i = (obj->maxHeapSize / 2) -1; i >= 0; i--){
+            maxHeapify(obj, i);
+        }
+    } else {
+        obj->minHeap[obj->minHeapSize++] = num;
+        for(int i = (obj->minHeapSize/ 2) - 1; i >= 0; i--){
+            minHeapify(obj, i);
+        }
     }
-    for (int i = 0; i < arraySize; i++) {
-        heap->data[i] = array[i];
+
+    // Rebalance
+    if (obj->maxHeapSize > obj->minHeapSize + 1){
+        obj->minHeap[obj->minHeapSize++] = obj->maxHeap[0];
+        obj->maxHeap[0] = obj->maxHeap[--obj->maxHeapSize];
+        maxHeapify(obj, 0);
+        minHeapify(obj, (obj->minHeapSize / 2) -1);
+    } else if (obj->minHeapSize > obj->maxHeapSize + 1){
+        obj->maxHeap[obj->maxHeapSize++] = obj->minHeap[0];
+        obj->minHeap[0] = obj->minHeap[--obj->minHeapSize];
+        minHeapify(obj, 0);
+        maxHeapify(obj, (obj->maxHeapSize / 2)- 1);
     }
-    heap->size = arraySize;
-    for (int i = (arraySize / 2) - 1; i >= 0; i--) {
-        heapifyDown(heap, i);
+}
+
+double findMedian(MedianFinder* obj){
+    if (obj->maxHeapSize > obj->minHeapSize){
+        return obj->maxHeap[0];
+    } else if ( obj->minHeapSize > obj->maxHeapSize){
+        return obj->minHeap[0];
+    } else {
+        return (obj->maxHeap[0] + obj->minHeap[0]) / 2.0;
     }
+}
+
+void medianFinderFree(MedianFinder* obj){
+    free(obj->maxHeap);
+    free(obj->minHeap);
+    free(obj);
 }
 
 
